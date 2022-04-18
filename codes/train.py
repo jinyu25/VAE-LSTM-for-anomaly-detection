@@ -1,5 +1,6 @@
 import os
 import tensorflow as tf
+import time
 from data_loader import DataGenerator
 from models import VAEmodel, lstmKerasModel
 from trainers import vaeTrainer
@@ -34,7 +35,9 @@ def main():
     # here you train your model
     if config['TRAIN_VAE']:
         if config['num_epochs_vae'] > 0:
+            # train your model
             trainer_vae.train()
+            # trainer_vae.summary() vae没有summary
 
     if config['TRAIN_LSTM']:
         # create a lstm model class instance
@@ -48,8 +51,7 @@ def main():
         lstm_nn_model = lstm_model.create_lstm_model(config)
         lstm_nn_model.summary()   # Display the model's architecture
         # checkpoint path
-        checkpoint_path = config['checkpoint_dir_lstm']\
-                          + "cp.ckpt"
+        checkpoint_path = config['checkpoint_dir_lstm'] + "cp.ckpt"
         # Create a callback that saves the model's weights
         cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                          save_weights_only=True,
@@ -59,8 +61,8 @@ def main():
 
         # start training
         if config['num_epochs_lstm'] > 0:
+            # train LSTM model
             lstm_model.train(config, lstm_nn_model, cp_callback)
-
         # make a prediction on the test set using the trained model
         lstm_embedding = lstm_nn_model.predict(lstm_model.x_test, batch_size=config['batch_size_lstm'])
         print(lstm_embedding.shape)
@@ -71,4 +73,7 @@ def main():
 
 
 if __name__ == '__main__':
+    start = time.time()
     main()
+    end = time.time()
+    print('VAE-LSTM执行过程总共花费了%s秒' % (end-start))
